@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://poultry-management-backend.onrender.com/api/:path*"
+      "destination": "https://poultry-management-fdtn.onrender.com"
     },
     {
       "source": "/uploads/:path*",
-      "destination": "https://poultry-management-backend.onrender.com/uploads/:path*"
+      "destination": "https://poultry-management-fdtn.onrender.com"
     }
   ]
 }

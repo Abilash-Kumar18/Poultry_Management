@@ -25,7 +25,7 @@ export default function DashboardPage() {
   const { stats, loading: statsLoading } = useDashboardStats(30000);
   const { data: farmsData } = useFetch('/farms');
   const { data: alertsData } = useFetch('/alerts', { status: 'active' });
-  const { data: visitorsData } = useFetch('/visitors', { limit: 5 });
+  const { data: visitorsData } = useFetch('/visitors', { limit: 30 });
   const { user } = useAuth();
   const { language, t } = useLanguage();
   const { isFarmerMode } = useFarmerMode();
@@ -36,14 +36,32 @@ export default function DashboardPage() {
   const name = user?.name?.split(' ')[0] || 'Farmer';
   const greeting = `${t(greetingKey)}, ${name}! ${t('dashboard.overview_subtitle')}`;
 
-  // Generate area chart data (mock trend for demo)
+  // Generate area chart data from real database visitor logs and active outbreak alerts
   const trendData = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - (6 - i));
+    const dayStr = d.toISOString().split('T')[0];
+    const dayName = d.toLocaleDateString(
+      language === 'ta' ? 'ta-IN' : language === 'hi' ? 'hi-IN' : 'en-US',
+      { weekday: 'short' }
+    );
+    
+    // Aggregate real visitors registered on this date
+    const dayVisitors = visitorsData?.visitors?.filter(v => {
+      if (!v.visit_date) return false;
+      return v.visit_date.startsWith(dayStr);
+    }).length || 0;
+
+    // Aggregate real active outbreak alerts posted on this date
+    const dayAlerts = alertsData?.alerts?.filter(a => {
+      if (!a.created_at) return false;
+      return a.created_at.startsWith(dayStr);
+    }).length || 0;
+
     return {
-      date: d.toLocaleDateString('en-US', { weekday: 'short' }),
-      visitors: Math.floor(Math.random() * 8 + 2),
-      alerts: Math.floor(Math.random() * 3),
+      date: dayName,
+      visitors: dayVisitors,
+      alerts: dayAlerts,
     };
   });
 
